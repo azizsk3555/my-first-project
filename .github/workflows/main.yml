@@ -1,22 +1,41 @@
-name: Deploy Website
+name: Deploy Website to GitHub Pages
 
 on:
   push:
     branches:
       - main   # Run on every push to main branch
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       # Step 1: Checkout the repo
       - name: Checkout repository
-        - uses: actions/upload-artifact@v4
+        uses: actions/checkout@v4
 
-      # Step 2: Upload artifact (build output)
-      - name: Upload website
-        uses: actions/upload-artifact@v3
+      # Step 2: Setup Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # Step 3: Upload artifact (your website files)
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: website
           path: ./
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      # Step 4: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
